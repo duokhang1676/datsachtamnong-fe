@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: SITE_INFO.seo?.metaDescription || "",
     images: [
       {
-        url: '/banner3.png',
+        url: 'https://datsachtamnong-fe.vercel.app/banner3.png',
         width: 1200,
         height: 630,
         alt: SITE_INFO.siteName,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: SITE_INFO.seo?.metaTitle || SITE_INFO.siteName,
     description: SITE_INFO.seo?.metaDescription || "",
-    images: ['/banner3.png'],
+    images: ['https://datsachtamnong-fe.vercel.app/banner3.png'],
   },
   other: {
     'google': 'notranslate', // Prevent Google Translate from causing hydration errors
