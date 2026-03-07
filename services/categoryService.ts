@@ -26,7 +26,7 @@ export interface CategoryStats {
 export interface CreateCategoryData {
   name: string;
   description?: string;
-  image?: string;
+  image?: string | {url: string; publicId: string};
   type: 'product' | 'news';
   order?: number;
   isActive?: boolean;
@@ -35,7 +35,7 @@ export interface CreateCategoryData {
 export interface UpdateCategoryData {
   name?: string;
   description?: string;
-  image?: string;
+  image?: string | {url: string; publicId: string};
   order?: number;
   isActive?: boolean;
 }

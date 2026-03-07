@@ -12,7 +12,7 @@ export interface CreateNewsData {
   title: string;
   content: string;
   excerpt?: string;
-  featuredImage?: string;
+  featuredImage?: string | {url: string; publicId: string};
   category: string;
   tags?: string[];
   isActive?: boolean;

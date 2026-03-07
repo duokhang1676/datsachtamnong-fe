@@ -60,7 +60,7 @@ export default function NewNewsCategoryPage() {
       await categoryService.createCategory({
         name: formData.name,
         description: formData.description,
-        image: image.url || undefined,
+        image: image,  // Send full object {url, publicId}
         type: 'news',
         order: formData.order,
       });

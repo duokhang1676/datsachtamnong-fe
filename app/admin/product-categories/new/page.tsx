@@ -78,7 +78,7 @@ export default function NewProductCategoryPage() {
       await categoryService.createCategory({
         name: formData.name,
         description: formData.description,
-        image: image.url || undefined,
+        image: image,  // Send full object {url, publicId}
         type: 'product',
         order: formData.order,
       });

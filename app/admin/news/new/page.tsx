@@ -82,7 +82,7 @@ export default function NewNewsPage() {
         title: formData.title,
         content: formData.content,
         excerpt: formData.excerpt,
-        featuredImage: featuredImage.url || undefined,
+        featuredImage: featuredImage,  // Send full object {url, publicId}
         category: formData.category,
         tags: [],
         isActive: formData.isActive,

@@ -114,7 +114,7 @@ export default function EditNewsPage() {
         title: formData.title,
         content: formData.content,
         excerpt: formData.excerpt,
-        featuredImage: typeof featuredImage === 'string' ? featuredImage : featuredImage.url,
+        featuredImage: featuredImage,  // Send full object {url, publicId}
         category: formData.category,
         isActive: formData.isActive,
       });
