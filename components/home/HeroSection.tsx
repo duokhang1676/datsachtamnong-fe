@@ -86,7 +86,7 @@ export default function HeroSection() {
               {banner.image && (
                 <div className="absolute inset-0">
                   <img
-                    src={banner.image}
+                    src={typeof banner.image === 'string' ? banner.image : banner.image.url}
                     alt={`Banner ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
