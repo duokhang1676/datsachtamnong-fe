@@ -74,7 +74,11 @@ export default function NewsSection() {
                 <Link href={`/news/${newsItem.slug}`}>
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={newsItem.featuredImage || "/placeholder-news.jpg"}
+                      src={newsItem.featuredImage 
+                        ? (typeof newsItem.featuredImage === 'string' 
+                            ? newsItem.featuredImage 
+                            : newsItem.featuredImage.url)
+                        : "/placeholder-news.jpg"}
                       alt={newsItem.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
