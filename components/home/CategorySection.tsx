@@ -50,9 +50,9 @@ export default function CategorySection() {
             >
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform bg-white shadow-lg">
-                  {category.image?.url ? (
+                  {category.image ? (
                     <img 
-                      src={category.image.url} 
+                      src={category.image} 
                       alt={category.name}
                       className="w-full h-full object-cover"
                     />

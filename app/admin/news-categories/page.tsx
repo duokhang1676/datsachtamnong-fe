@@ -101,9 +101,9 @@ export default function NewsCategoriesPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-16 bg-blue-50 rounded-lg flex items-center justify-center overflow-hidden">
-                        {category.image?.url ? (
+                        {category.image ? (
                           <img 
-                            src={category.image.url} 
+                            src={category.image} 
                             alt={category.name}
                             className="w-full h-full object-cover"
                           />

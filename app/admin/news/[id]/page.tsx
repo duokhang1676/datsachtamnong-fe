@@ -8,6 +8,9 @@ import { getNewsById, updateNews } from "@/services/newsService";
 import { uploadImages } from "@/services/uploadService";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 
+// Disable static generation for this admin page
+export const dynamic = 'force-dynamic';
+
 export default function EditNewsPage() {
   const router = useRouter();
   const params = useParams();
@@ -111,7 +114,7 @@ export default function EditNewsPage() {
         title: formData.title,
         content: formData.content,
         excerpt: formData.excerpt,
-        featuredImage,
+        featuredImage: typeof featuredImage === 'string' ? featuredImage : featuredImage.url,
         category: formData.category,
         isActive: formData.isActive,
       });

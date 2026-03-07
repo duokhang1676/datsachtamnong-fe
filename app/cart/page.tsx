@@ -74,7 +74,7 @@ export default function CartPage() {
                         <button
                           onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
                           className="px-2 py-1 hover:bg-gray-100"
-                          disabled={item.quantity >= item.product.stock}
+                          disabled={item.product.stock !== undefined && item.quantity >= item.product.stock}
                         >
                           <Plus size={14} />
                         </button>

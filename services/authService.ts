@@ -90,9 +90,11 @@ export const updatePassword = async (data: { currentPassword: string; newPasswor
 
 // Logout
 export const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.href = '/admin/login';
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/admin/login';
+  }
 };
 
 // Check if user is authenticated

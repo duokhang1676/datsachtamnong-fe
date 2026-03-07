@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { Calendar, ArrowRight, Search, Eye } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import * as newsService from "@/services/newsService";
 import categoryService, { Category } from "@/services/categoryService";
 import Button from "@/components/ui/Button";
 
-export default function NewsPage() {
+// Component that uses useSearchParams - must be wrapped in Suspense
+function NewsContent() {
   const searchParams = useSearchParams();
   const [news, setNews] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -193,5 +194,14 @@ export default function NewsPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+// Wrapper page component with Suspense
+export default function NewsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Đang tải...</div>}>
+      <NewsContent />
+    </Suspense>
   );
 }

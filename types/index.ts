@@ -4,6 +4,8 @@ export interface Product {
   slug: string;
   description: string;
   shortDescription?: string;
+  price: number;
+  comparePrice?: number;
   category: Category;
   images: Array<{url: string; publicId: string}>;
   packaging?: string;
@@ -12,6 +14,8 @@ export interface Product {
   isFeatured: boolean;
   isActive: boolean;
   status: 'available' | 'unavailable' | 'discontinued';
+  stock?: number;
+  sku?: string;
   views: number;
   createdAt: string;
   updatedAt: string;
@@ -31,9 +35,10 @@ export interface User {
   email: string;
   phone?: string;
   address?: string;
-  role: "customer" | "admin";
+  role: "customer" | "admin" | string;
   avatar?: string;
-  createdAt: string;
+  token?: string;
+  createdAt?: string;
 }
 
 export interface CartItem {

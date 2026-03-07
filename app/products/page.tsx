@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import * as productService from "@/services/productService";
 import categoryService, { Category } from "@/services/categoryService";
 import ProductCard from "@/components/products/ProductCard";
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -117,5 +117,14 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Wrapper with Suspense
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Đang tải...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

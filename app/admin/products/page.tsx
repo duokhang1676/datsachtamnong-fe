@@ -5,22 +5,7 @@ import { Search, Plus, Edit, Trash2, Package, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as productService from "@/services/productService";
-
-interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  status?: 'available' | 'unavailable' | 'discontinued';
-  category: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
-  images: Array<{url: string; publicId: string}> | string[];
-  featured: boolean;
-  createdAt: string;
-}
+import { Product } from "@/types";
 
 export default function AdminProductsPage() {
   const router = useRouter();

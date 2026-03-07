@@ -83,10 +83,10 @@ export default function HeroSection() {
           >
             <div className="h-full relative flex items-center">
               {/* Background Image */}
-              {banner.image?.url && (
+              {banner.image && (
                 <div className="absolute inset-0">
                   <img
-                    src={banner.image.url}
+                    src={banner.image}
                     alt={`Banner ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
