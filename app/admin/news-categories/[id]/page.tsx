@@ -37,9 +37,9 @@ export default function EditNewsCategoryPage() {
         description: data.description || "",
         order: data.order || 0,
       });
-      if (data.image?.url) {
+      if (data.image) {
         setExistingImage(data.image);
-        setImagePreview(data.image.url);
+        setImagePreview(data.image);
       }
     } catch (error: any) {
       console.error('Error fetching category:', error);

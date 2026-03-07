@@ -16,6 +16,15 @@ export interface CreateCustomerData {
   note?: string;
 }
 
+export interface UpdateCustomerData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  source?: 'footer' | 'checkout' | 'manual' | 'contact';
+  note?: string;
+  status?: 'active' | 'unsubscribed';
+}
+
 // Get all customers (Admin only)
 export const getCustomers = async (filters?: CustomerFilters) => {
   const params = new URLSearchParams();
@@ -43,7 +52,7 @@ export const createCustomer = async (customerData: CreateCustomerData) => {
 };
 
 // Update customer (Admin only)
-export const updateCustomer = async (id: string, customerData: Partial<CreateCustomerData>) => {
+export const updateCustomer = async (id: string, customerData: UpdateCustomerData) => {
   const response = await api.put(`/customers/${id}`, customerData);
   return response.data;
 };
