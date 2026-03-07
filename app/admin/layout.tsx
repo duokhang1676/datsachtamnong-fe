@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Package, Newspaper, MessageSquare, Settings, LogOut, FolderTree, ChevronDown, Users, Image } from "lucide-react";
+import { LayoutDashboard, Package, Newspaper, MessageSquare, Settings, LogOut, FolderTree, ChevronDown, Users, Image, Menu, X } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout, loading } = useAuth();
@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     pathname?.startsWith("/admin/product-categories") || 
     pathname?.startsWith("/admin/news-categories")
   );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoginPage && !loading && (!isAuthenticated || user?.role !== "admin")) {
@@ -66,14 +67,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header with Hamburger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-[#005e35] text-white z-50 px-4 py-3 flex items-center justify-between shadow-lg">
+        <div>
+          <h2 className="text-lg font-bold">Admin Panel</h2>
+          <p className="text-xs text-gray-300">Đất Sạch Tam Nông</p>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+        >
+          {sidebarOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
+        </button>
+      </div>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 mt-16"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-[#005e35] text-white min-h-screen fixed">
-          <div className="p-6">
+        <aside className={`
+          w-64 bg-[#005e35] text-white min-h-screen fixed z-50
+          lg:translate-x-0 lg:static lg:z-auto
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:mt-0 mt-16
+        `}>
+          <div className="p-6 hidden lg:block">
             <h2 className="text-2xl font-bold">Admin Panel</h2>
             <p className="text-sm text-gray-300 mt-1">Đất Sạch Tam Nông</p>
           </div>
-          <nav className="px-4">
+          <nav className="px-4 pb-20">
             {menu.map((item) => {
               if (item.isDropdown && item.submenu) {
                 const isAnySubmenuActive = item.submenu.some(sub => 
@@ -108,6 +137,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             <Link
                               key={subItem.href}
                               href={subItem.href}
+                              onClick={() => setSidebarOpen(false)}
                               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                                 isActive
                                   ? 'bg-[#39b54a]/50 text-white font-semibold'
@@ -131,6 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mb-1 ${
                     isActive
                       ? 'bg-[#39b54a] text-white font-semibold'
@@ -160,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 ml-64 p-8">{children}</main>
+        <main className="flex-1 lg:ml-64 p-4 lg:p-8 mt-16 lg:mt-0">{children}</main>
       </div>
     </div>
   );
