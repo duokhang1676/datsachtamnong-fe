@@ -50,15 +50,22 @@ export default function CategorySection() {
             >
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform bg-white shadow-lg">
-                  {category.image ? (
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Package size={80} className="text-green-600" />
-                  )}
+                  {(() => {
+                    const imageUrl = !category.image 
+                      ? '' 
+                      : typeof category.image === 'string' 
+                        ? category.image 
+                        : (category.image as {url: string; publicId: string}).url;
+                    return imageUrl ? (
+                      <img 
+                        src={imageUrl} 
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Package size={80} className="text-green-600" />
+                    );
+                  })()}
                 </div>
                 <h3 className="font-bold text-lg text-gray-900 mb-3">{category.name}</h3>
                 <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{category.description}</p>

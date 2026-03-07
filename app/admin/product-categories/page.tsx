@@ -96,14 +96,21 @@ export default function ProductCategoriesPage() {
                     Đang tải...
                   </td>
                 </tr>
-              ) : filteredCategories.map((category) => (
+              ) : filteredCategories.map((category) => {
+                const imageUrl = !category.image 
+                  ? '' 
+                  : typeof category.image === 'string' 
+                    ? category.image 
+                    : (category.image as {url: string; publicId: string}).url;
+                
+                return (
                 <tr key={category._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-16 bg-green-50 rounded-lg flex items-center justify-center overflow-hidden">
-                        {category.image ? (
+                        {imageUrl ? (
                           <img 
-                            src={category.image} 
+                            src={imageUrl} 
                             alt={category.name}
                             className="w-full h-full object-cover"
                           />
@@ -156,7 +163,8 @@ export default function ProductCategoriesPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
 
