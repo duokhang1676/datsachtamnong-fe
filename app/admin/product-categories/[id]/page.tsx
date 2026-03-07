@@ -38,8 +38,11 @@ export default function EditProductCategoryPage() {
         order: data.order || 0,
       });
       if (data.image) {
-        setExistingImage(data.image);
-        setImagePreview(data.image);
+        const imageData = typeof data.image === 'string' 
+          ? {url: data.image, publicId: ''} 
+          : data.image;
+        setExistingImage(imageData);
+        setImagePreview(imageData.url);
       }
     } catch (error: any) {
       console.error('Error fetching category:', error);
