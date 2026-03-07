@@ -251,14 +251,14 @@ export default function Header() {
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                <Search size={24} className="text-gray-700" />
+                <Search size={24} className="text-gray-900" />
               </button>
 
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {mobileMenuOpen ? <X size={24} className="text-gray-900" /> : <Menu size={24} className="text-gray-900" />}
               </button>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
                   placeholder="Tìm sản phẩm bạn muốn..."
-                  className="flex-1 px-4 py-2 text-sm focus:outline-none"
+                  className="flex-1 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none"
                 />
                 <button type="submit" className="px-4 bg-[#39b54a] hover:bg-[#02a319] text-white transition-colors">
                   <Search size={20} />
