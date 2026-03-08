@@ -171,14 +171,48 @@ export default function NewsDetailPage() {
     );
   }
 
+  // Generate Article structured data (JSON-LD) for Google
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": news.title,
+    "description": news.excerpt || news.content?.replace(/<[^>]*>/g, '').substring(0, 200),
+    "image": typeof news.featuredImage === 'string' 
+      ? news.featuredImage 
+      : news.featuredImage?.url || `${typeof window !== 'undefined' ? window.location.origin : 'https://datsachtamnong.com'}/banner3.png`,
+    "author": {
+      "@type": "Person",
+      "name": news.author || "Đất Sạch Tam Nông"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Đất Sạch Tam Nông",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${typeof window !== 'undefined' ? window.location.origin : 'https://datsachtamnong.com'}/logo.png`
+      }
+    },
+    "datePublished": news.publishedAt || news.createdAt,
+    "dateModified": news.updatedAt || news.createdAt,
+    "articleSection": news.category?.name || "Tin tức",
+    "url": `${typeof window !== 'undefined' ? window.location.href : `https://datsachtamnong.com/news/${news.slug}`}`
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Back Button */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/news">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="mr-2 w-4 h-4" />
+    <>
+      {/* Article Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+      />
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Back Button */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-4">
+            <Link href="/news">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="mr-2 w-4 h-4" />
               Quay lại
             </Button>
           </Link>
@@ -346,6 +380,7 @@ export default function NewsDetailPage() {
           </div>
         </div>
       </article>
-    </div>
+      </div>
+    </>
   );
 }
