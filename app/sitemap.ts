@@ -4,6 +4,9 @@ import * as newsService from '@/services/newsService';
 
 const BASE_URL = 'https://datsachtamnong.com';
 
+// Revalidate sitemap every 1 hour (3600 seconds)
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticRoutes = [
