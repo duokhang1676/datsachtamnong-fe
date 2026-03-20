@@ -77,6 +77,18 @@ export default function AdminNewsPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const getFeaturedImageUrl = (article: any): string => {
+    if (typeof article?.featuredImage === "string") {
+      return article.featuredImage;
+    }
+
+    if (typeof article?.featuredImage?.url === "string") {
+      return article.featuredImage.url;
+    }
+
+    return "";
+  };
+
   return (
     <div>
       {/* Error Message */}
@@ -173,11 +185,14 @@ export default function AdminNewsPage() {
                 <tr key={article._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      {article.featuredImage?.url ? (
+                      {getFeaturedImageUrl(article) ? (
                         <img 
-                          src={article.featuredImage.url} 
+                          src={getFeaturedImageUrl(article)} 
                           alt={article.title}
                           className="w-16 h-16 object-cover rounded-lg"
+                          onError={(event) => {
+                            event.currentTarget.src = "/placeholder-news.jpg";
+                          }}
                         />
                       ) : (
                         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">

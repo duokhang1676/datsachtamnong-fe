@@ -231,6 +231,9 @@ export default function NewsDetailPage() {
                   src={news.featuredImage?.url || news.image || "/placeholder-news.jpg"}
                   alt={news.title}
                   className="w-full h-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.src = "/placeholder-news.jpg";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
@@ -361,6 +364,9 @@ export default function NewsDetailPage() {
                             src={relatedArticle.featuredImage?.url || relatedArticle.image || "/placeholder-news.jpg"}
                             alt={relatedArticle.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(event) => {
+                              event.currentTarget.src = "/placeholder-news.jpg";
+                            }}
                           />
                         </div>
                         <div className="p-4">
