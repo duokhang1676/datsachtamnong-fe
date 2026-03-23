@@ -47,9 +47,13 @@ export default function NewsDetailPage() {
       setNews(newsData);
 
       // Fetch related news (same category)
-      if (newsData?.category) {
+      const categoryId = typeof newsData?.category === "string"
+        ? newsData.category
+        : newsData?.category?._id;
+
+      if (categoryId) {
         const response = await newsService.getNews({ 
-          category: newsData.category,
+          category: categoryId,
           isActive: true,
           limit: 4
         });
@@ -326,10 +330,10 @@ export default function NewsDetailPage() {
                 ref={contentRef}
                 className="article-content p-8 prose prose-lg max-w-none
                   prose-headings:text-gray-900 prose-headings:scroll-mt-24 prose-headings:font-bold
-                  prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-6 prose-h1:leading-tight
-                  prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-5 prose-h2:leading-snug
-                  prose-h3:text-2xl prose-h3:mt-6 prose-h3:mb-4 prose-h3:leading-normal
-                  prose-h4:text-xl prose-h4:mt-5 prose-h4:mb-3
+                  prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-5 prose-h1:leading-tight
+                  prose-h2:text-2xl prose-h2:mt-7 prose-h2:mb-4 prose-h2:leading-snug
+                  prose-h3:text-xl prose-h3:mt-5 prose-h3:mb-3 prose-h3:leading-normal
+                  prose-h4:text-lg prose-h4:mt-4 prose-h4:mb-2
                   prose-h5:text-lg prose-h5:mt-4 prose-h5:mb-2
                   prose-h6:text-base prose-h6:mt-3 prose-h6:mb-2
                   prose-p:text-base prose-p:text-gray-800 prose-p:leading-relaxed prose-p:mb-4

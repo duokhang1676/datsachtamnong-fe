@@ -15,12 +15,23 @@ export default function AdminNewsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [globalStats, setGlobalStats] = useState({ total: 0, active: 0, inactive: 0 });
+
+  const PAGE_SIZE = 10;
 
   // Fetch news from API
   useEffect(() => {
-    fetchNews();
     fetchCategories();
+    void fetchNewsStats();
   }, []);
+
+  useEffect(() => {
+    void fetchNews(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, selectedCategory, selectedStatus]);
 
   const fetchCategories = async () => {
     try {
@@ -31,17 +42,45 @@ export default function AdminNewsPage() {
     }
   };
 
-  const fetchNews = async () => {
+  const fetchNews = async (page: number = currentPage) => {
     try {
       setLoading(true);
       setError("");
-      const data = await newsService.getNews({});
+
+      const isActiveFilter = selectedStatus === "all"
+        ? undefined
+        : selectedStatus === "active";
+
+      const data = await newsService.getNews({
+        page,
+        limit: PAGE_SIZE,
+        search: searchTerm.trim() || undefined,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        isActive: isActiveFilter
+      });
+
       setNews(data.data || []);
+      setCurrentPage(Number(data.currentPage || page));
+      setTotalPages(Number(data.totalPages || 1));
+      setTotalCount(Number(data.total || 0));
     } catch (err: any) {
       console.error("Error fetching news:", err);
       setError(err.response?.data?.message || "Không thể tải danh sách tin tức");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNewsStats = async () => {
+    try {
+      const stats = await newsService.getNewsStats();
+      setGlobalStats({
+        total: Number(stats?.total || 0),
+        active: Number(stats?.active || 0),
+        inactive: Number(stats?.inactive || 0)
+      });
+    } catch (err) {
+      console.error("Error fetching news stats:", err);
     }
   };
 
@@ -57,25 +96,21 @@ export default function AdminNewsPage() {
     try {
       await newsService.deleteNews(articleId);
       alert('Đã xóa bài viết thành công!');
-      fetchNews(); // Reload news list
+      await Promise.all([
+        fetchNews(currentPage),
+        fetchNewsStats()
+      ]);
     } catch (err: any) {
       console.error("Error deleting news:", err);
       alert(err.response?.data?.message || 'Không thể xóa bài viết');
     }
   };
 
-  const handleView = (articleId: string) => {
-    window.open(`/news/${articleId}`, '_blank');
+  const handleView = (slugOrId: string) => {
+    window.open(`/news/${slugOrId}`, '_blank');
   };
 
-  const filteredNews = news.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || article.category?.slug === selectedCategory;
-    const matchesStatus = selectedStatus === "all" || 
-      (selectedStatus === "active" && article.isActive) ||
-      (selectedStatus === "inactive" && !article.isActive);
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  const filteredNews = news;
 
   const getFeaturedImageUrl = (article: any): string => {
     if (typeof article?.featuredImage === "string") {
@@ -118,7 +153,7 @@ export default function AdminNewsPage() {
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Quản lý tin tức</h1>
-              <p className="text-gray-600">Tổng {news.length} bài viết • {news.filter(n => n.isActive).length} đã xuất bản</p>
+              <p className="text-gray-600">Tổng {totalCount} bài viết • Trang {currentPage}/{Math.max(totalPages, 1)}</p>
             </div>
             <button 
               onClick={() => router.push('/admin/news/new')}
@@ -149,7 +184,7 @@ export default function AdminNewsPage() {
           >
             <option value="all">Tất cả danh mục</option>
             {categories.map(cat => (
-              <option key={cat._id} value={cat.slug}>
+              <option key={cat._id} value={cat._id}>
                 {cat.name}
               </option>
             ))}
@@ -166,6 +201,26 @@ export default function AdminNewsPage() {
         </div>
       </div>
 
+      {totalPages > 1 ? (
+        <div className="mt-4 flex items-center justify-end gap-2">
+          <button
+            onClick={() => void fetchNews(Math.max(1, currentPage - 1))}
+            disabled={currentPage <= 1 || loading}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Trang trước
+          </button>
+          <span className="px-2 text-sm text-gray-600">{currentPage} / {totalPages}</span>
+          <button
+            onClick={() => void fetchNews(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage >= totalPages || loading}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Trang sau
+          </button>
+        </div>
+      ) : null}
+
       {/* News Table */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="overflow-x-auto">
@@ -181,7 +236,7 @@ export default function AdminNewsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredNews.map((article, index) => (
+              {filteredNews.map((article) => (
                 <tr key={article._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -201,7 +256,7 @@ export default function AdminNewsPage() {
                       )}
                       <div className="max-w-md">
                         <p className="font-medium text-gray-900 line-clamp-2">{article.title}</p>
-                        <p className="text-sm text-gray-500">N{String(index + 1).padStart(3, '0')}</p>
+                        <p className="text-sm text-gray-500">ID: {article._id}</p>
                       </div>
                     </div>
                   </td>
@@ -233,7 +288,7 @@ export default function AdminNewsPage() {
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
                       <button 
-                        onClick={() => handleView(article._id)}
+                        onClick={() => handleView(article.slug || article._id)}
                         className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="Xem"
                       >
@@ -276,15 +331,15 @@ export default function AdminNewsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="text-center">
             <p className="text-gray-600 text-sm mb-1">Tổng bài viết</p>
-            <p className="text-2xl font-bold text-gray-900">{news.length}</p>
+            <p className="text-2xl font-bold text-gray-900">{globalStats.total}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-600 text-sm mb-1">Đã xuất bản</p>
-            <p className="text-2xl font-bold text-green-600">{news.filter(n => n.isActive).length}</p>
+            <p className="text-2xl font-bold text-green-600">{globalStats.active}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-600 text-sm mb-1">Bản nháp</p>
-            <p className="text-2xl font-bold text-gray-600">{news.filter(n => !n.isActive).length}</p>
+            <p className="text-2xl font-bold text-gray-600">{globalStats.inactive}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-600 text-sm mb-1">Danh mục</p>

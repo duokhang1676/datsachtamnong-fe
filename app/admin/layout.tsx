@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Package, Newspaper, MessageSquare, Settings, LogOut, FolderTree, ChevronDown, Users, Image, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, Newspaper, MessageSquare, Settings, LogOut, FolderTree, ChevronDown, Users, Image, Menu, X, Bot } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout, loading } = useAuth();
@@ -60,6 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ]
     },
     { icon: Newspaper, label: "Tin tức", href: "/admin/news" },
+    { icon: Bot, label: "Quản lý Agent", href: "/admin/agents" },
     { icon: Users, label: "Quản lý khách hàng", href: "/admin/customers" },
     { icon: MessageSquare, label: "Liên hệ & Góp ý", href: "/admin/contacts" },
     { icon: Settings, label: "Thông tin công ty", href: "/admin/settings" },
@@ -93,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar */}
         <aside className={`
           w-64 bg-[#005e35] text-white min-h-screen fixed z-50
-          lg:translate-x-0 lg:static lg:z-auto
+          lg:translate-x-0 lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:overflow-y-auto
           transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           lg:mt-0 mt-16
@@ -191,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8">{children}</main>
+        <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8 lg:ml-64">{children}</main>
       </div>
     </div>
   );

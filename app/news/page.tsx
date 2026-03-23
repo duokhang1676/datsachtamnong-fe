@@ -14,12 +14,17 @@ function NewsContent() {
   const [news, setNews] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const PAGE_SIZE = 12;
 
   useEffect(() => {
-    fetchData();
+    fetchData(1, true);
   }, []);
 
   useEffect(() => {
@@ -30,25 +35,44 @@ function NewsContent() {
     }
   }, [searchParams]);
 
-  const fetchData = async () => {
+  const fetchData = async (page: number, reset: boolean) => {
     try {
-      setLoading(true);
+      if (reset) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError("");
       
       // Load categories and news in parallel
       const [newsResponse, categoriesData] = await Promise.all([
-        newsService.getNews({ isActive: true }),
+        newsService.getNews({ isActive: true, page, limit: PAGE_SIZE }),
         categoryService.getCategories({ type: 'news', isActive: true })
       ]);
-      
-      setNews(newsResponse.data || []);
+
+      const incomingRows = Array.isArray(newsResponse.data) ? newsResponse.data : [];
+      setNews((prev) => reset ? incomingRows : [...prev, ...incomingRows]);
       setCategories(categoriesData);
+      setCurrentPage(Number(newsResponse.currentPage || page));
+      setTotalPages(Number(newsResponse.totalPages || 1));
     } catch (err: any) {
       console.error("Error fetching data:", err);
       setError(err.response?.data?.message || "Không thể tải dữ liệu");
     } finally {
-      setLoading(false);
+      if (reset) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
+  };
+
+  const handleLoadMore = async () => {
+    if (loadingMore || currentPage >= totalPages) {
+      return;
+    }
+
+    await fetchData(currentPage + 1, false);
   };
 
   const filteredNews = news
@@ -137,9 +161,10 @@ function NewsContent() {
                 <p className="text-gray-500 text-lg">Không tìm thấy tin tức phù hợp</p>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredNews.map((newsItem) => (
-                  <article key={newsItem._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
+              <>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredNews.map((newsItem) => (
+                    <article key={newsItem._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
                     {/* Image */}
                     <Link href={`/news/${newsItem.slug}`}>
                       <div className="relative h-48 overflow-hidden">
@@ -189,9 +214,22 @@ function NewsContent() {
                         </Button>
                       </Link>
                     </div>
-                  </article>
-                ))}
-              </div>
+                    </article>
+                  ))}
+                </div>
+
+                {currentPage < totalPages ? (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      variant="outline"
+                    >
+                      {loadingMore ? "Đang tải thêm..." : "Xem thêm bản tin"}
+                    </Button>
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
         </div>
