@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Calendar, ArrowLeft, Eye, Volume2, VolumeX, Pause } from "lucide-react";
+import { Calendar, ArrowLeft, Eye, Volume2, VolumeX, Pause, Loader } from "lucide-react";
 import * as newsService from "@/services/newsService";
 import Button from "@/components/ui/Button";
 
@@ -11,6 +11,7 @@ export default function NewsDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
   const contentRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   const [news, setNews] = useState<any>(null);
   const [relatedNews, setRelatedNews] = useState<any[]>([]);
@@ -18,24 +19,20 @@ export default function NewsDetailPage() {
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
   useEffect(() => {
     fetchNews();
-    // Check if speech synthesis is supported
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      setSpeechSupported(true);
-    }
   }, [slug]);
 
-  // Cleanup speech on unmount or news change
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
       }
     };
-  }, [news]);
+  }, []);
 
   const fetchNews = async () => {
     try {
@@ -97,58 +94,77 @@ export default function NewsDetailPage() {
     return `${news.title}. ${news.excerpt}. ${textContent}`;
   };
 
+  const generateAndPlayAudio = async () => {
+    try {
+      const text = getTextContent();
+      if (!text || text.trim().length === 0) {
+        alert("Nội dung bài viết trống");
+        return;
+      }
+
+      setIsLoadingAudio(true);
+
+      const agentApiBase = (process.env.NEXT_PUBLIC_AGENT_API_URL || "http://localhost:4000/api").replace(/\/$/, "");
+      const response = await fetch(`${agentApiBase}/tts/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text,
+          lang: "vi-VN",
+          slow: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error || "Không thể tạo audio");
+      }
+
+      const payload = await response.json();
+      const audioUrl = payload?.data?.url as string;
+      if (!audioUrl) {
+        throw new Error("Không nhận được URL audio");
+      }
+
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        await audioRef.current.play();
+        setIsSpeaking(true);
+        setIsPaused(false);
+      }
+    } catch (error: any) {
+      console.error("Error generating/playing TTS audio:", error);
+      alert(error?.message || "Không thể phát audio");
+      setIsSpeaking(false);
+      setIsPaused(false);
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
+
   const handlePlayPause = () => {
-    if (!speechSupported) {
-      alert('Trình duyệt của bạn không hỗ trợ tính năng đọc văn bản');
+    if (!audioRef.current) {
       return;
     }
 
-    const synth = window.speechSynthesis;
-
     if (isPaused) {
-      synth.resume();
+      void audioRef.current.play();
       setIsPaused(false);
+      setIsSpeaking(true);
     } else if (isSpeaking) {
-      synth.pause();
+      audioRef.current.pause();
       setIsPaused(true);
     } else {
-      // Start new speech
-      const text = getTextContent();
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Set Vietnamese voice if available
-      const voices = synth.getVoices();
-      const viVoice = voices.find(voice => voice.lang.startsWith('vi'));
-      if (viVoice) {
-        utterance.voice = viVoice;
-      }
-      
-      utterance.lang = 'vi-VN';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        setIsPaused(false);
-      };
-      
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-      };
-      
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-      };
-      
-      synth.speak(utterance);
+      void generateAndPlayAudio();
     }
   };
 
   const handleStop = () => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
       setIsSpeaking(false);
       setIsPaused(false);
     }
@@ -210,6 +226,19 @@ export default function NewsDetailPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
       />
 
+      <audio
+        ref={audioRef}
+        onEnded={() => {
+          setIsSpeaking(false);
+          setIsPaused(false);
+        }}
+        onError={(event) => {
+          console.error("Audio playback error:", event);
+          setIsSpeaking(false);
+          setIsPaused(false);
+        }}
+      />
+
       <div className="min-h-screen bg-gray-50">
         {/* Back Button */}
         <div className="bg-white border-b">
@@ -263,24 +292,29 @@ export default function NewsDetailPage() {
               </div>
 
               {/* Audio Reading Controls */}
-              {speechSupported && (
                 <div className="p-8 border-b bg-gradient-to-r from-[#005e35]/5 to-[#39b54a]/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Volume2 size={24} className="text-[#39b54a]" />
                       <div>
                         <h2 className="text-lg font-bold text-gray-900">Nghe bản tin</h2>
-                        <p className="text-sm text-gray-600">Phát âm thanh nội dung bài viết</p>
+                        <p className="text-sm text-gray-600">Phát âm thanh nội dung bài viết bằng Google Cloud TTS</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
                         onClick={handlePlayPause}
-                        variant={isSpeaking ? "outline" : "primary"}
+                        disabled={isLoadingAudio}
+                        variant={isSpeaking && !isPaused ? "outline" : "primary"}
                         size="sm"
                         className="flex items-center gap-2"
                       >
-                        {isPaused ? (
+                        {isLoadingAudio ? (
+                          <>
+                            <Loader size={18} className="animate-spin" />
+                            Đang chuẩn bị
+                          </>
+                        ) : isPaused ? (
                           <>
                             <Volume2 size={18} />
                             Tiếp tục
@@ -323,7 +357,6 @@ export default function NewsDetailPage() {
                     </div>
                   )}
                 </div>
-              )}
 
               {/* Content */}
               <div 
