@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle, Leaf, Award, Users, Heart, Target, TrendingUp, ShieldCheck } from "lucide-react";
-import Image from "next/image";
 
 export default function AboutPage() {
   const values = [
@@ -106,11 +105,17 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="relative">
-                <img
-                  src="/product.jpg"
-                  alt="Đất Sạch Tam Nông"
-                  className="rounded-2xl shadow-2xl w-full h-[500px] object-cover"
-                />
+                <div className="overflow-hidden rounded-2xl shadow-2xl bg-black">
+                  <video
+                    className="w-full h-[500px] object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src="/video.mp4" type="video/mp4" />
+                    Trình duyệt của bạn không hỗ trợ phát video.
+                  </video>
+                </div>
               </div>
             </div>
           </div>
